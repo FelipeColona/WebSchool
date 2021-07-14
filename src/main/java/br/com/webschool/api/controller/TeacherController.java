@@ -21,12 +21,14 @@ import br.com.webschool.api.assembler.TeacherAssembler;
 import br.com.webschool.api.model.TeacherModel;
 import br.com.webschool.domain.model.Teacher;
 import br.com.webschool.domain.repository.TeacherRepository;
+import br.com.webschool.domain.service.TeacherService;
 import lombok.AllArgsConstructor;
 
 @RestController
 @RequestMapping("/teachers")
 @AllArgsConstructor
 public class TeacherController {
+    private TeacherService teacherService;
     private TeacherRepository teacherRepository;
     private TeacherAssembler teacherAssembler;
 
@@ -50,7 +52,7 @@ public class TeacherController {
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public TeacherModel createTeacher(@RequestBody @Valid Teacher teacher){
-        Teacher savedTeacher = teacherRepository.save(teacher);
+        Teacher savedTeacher = teacherService.save(teacher);
 
         return teacherAssembler.toModel(savedTeacher);
     }
@@ -62,7 +64,7 @@ public class TeacherController {
         }
 
         teacher.setId(teacherId);
-        Teacher savedTeacher = teacherRepository.save(teacher);
+        Teacher savedTeacher = teacherService.save(teacher);
 
         return ResponseEntity.ok(teacherAssembler.toModel(savedTeacher));
     }
@@ -73,7 +75,7 @@ public class TeacherController {
             return ResponseEntity.notFound().build();
         }
 
-        teacherRepository.deleteById(teacherId);
+        teacherService.delete(teacherId);
 
         return ResponseEntity.noContent().build();
     }
