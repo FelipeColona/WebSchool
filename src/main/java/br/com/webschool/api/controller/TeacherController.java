@@ -3,6 +3,8 @@ package br.com.webschool.api.controller;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,14 +49,14 @@ public class TeacherController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public TeacherModel createTeacher(@RequestBody Teacher teacher){
+    public TeacherModel createTeacher(@RequestBody @Valid Teacher teacher){
         Teacher savedTeacher = teacherRepository.save(teacher);
 
         return teacherAssembler.toModel(savedTeacher);
     }
 
     @PutMapping("/{teacherId}")
-    public ResponseEntity<TeacherModel> updateTeacher(@PathVariable Long teacherId, @RequestBody Teacher teacher){
+    public ResponseEntity<TeacherModel> updateTeacher(@PathVariable Long teacherId, @RequestBody @Valid Teacher teacher){
         if(!teacherRepository.existsById(teacherId)){
             return ResponseEntity.notFound().build();
         }
