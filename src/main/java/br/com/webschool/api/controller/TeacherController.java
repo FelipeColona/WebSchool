@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.webschool.api.assembler.TeacherAssembler;
 import br.com.webschool.api.model.TeacherModel;
+import br.com.webschool.api.model.input.TeacherInput;
 import br.com.webschool.domain.model.Teacher;
 import br.com.webschool.domain.repository.TeacherRepository;
 import br.com.webschool.domain.service.TeacherService;
@@ -51,20 +52,19 @@ public class TeacherController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public TeacherModel createTeacher(@RequestBody @Valid Teacher teacher){
-        Teacher savedTeacher = teacherService.save(teacher);
+    public TeacherModel createTeacher(@RequestBody @Valid TeacherInput teacherInput){
+        Teacher savedTeacher = teacherService.save(teacherInput);
 
         return teacherAssembler.toModel(savedTeacher);
     }
 
     @PutMapping("/{teacherId}")
-    public ResponseEntity<TeacherModel> updateTeacher(@PathVariable Long teacherId, @RequestBody @Valid Teacher teacher){
+    public ResponseEntity<TeacherModel> updateTeacher(@PathVariable Long teacherId, @RequestBody @Valid TeacherInput teacherInput){
         if(!teacherRepository.existsById(teacherId)){
             return ResponseEntity.notFound().build();
         }
 
-        teacher.setId(teacherId);
-        Teacher savedTeacher = teacherService.save(teacher);
+        Teacher savedTeacher = teacherService.update(teacherId, teacherInput);
 
         return ResponseEntity.ok(teacherAssembler.toModel(savedTeacher));
     }

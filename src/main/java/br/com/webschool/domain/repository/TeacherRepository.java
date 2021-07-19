@@ -9,5 +9,5 @@ import br.com.webschool.domain.model.Teacher;
 
 @Repository
 public interface TeacherRepository extends JpaRepository<Teacher, Long> {
-    Optional<Teacher> findByLogin(String email);
+    Optional<Teacher> findByLogin(String login);
 }

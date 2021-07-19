@@ -6,6 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 import br.com.webschool.api.model.TeacherModel;
+import br.com.webschool.api.model.input.TeacherInput;
 import br.com.webschool.domain.model.Teacher;
 import lombok.AllArgsConstructor;
 
@@ -22,5 +23,9 @@ public class TeacherAssembler {
         return teachers.stream()
                 .map(this::toModel)
                 .toList();
+    }
+
+    public Teacher toEntity(TeacherInput teacherInput){
+        return modelMapper.map(teacherInput, Teacher.class);
     }
 }
