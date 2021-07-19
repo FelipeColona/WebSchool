@@ -22,7 +22,7 @@ public class TeacherService {
     @Transactional
     public Teacher save(Teacher teacher){
 
-        boolean emailInUse = teacherRepository.findByEmail(teacher.getEmail()).stream()
+        boolean emailInUse = teacherRepository.findByLogin(teacher.getLogin()).stream()
                 .anyMatch(existingTeacher -> !existingTeacher.equals(teacher));
 
         if(emailInUse){

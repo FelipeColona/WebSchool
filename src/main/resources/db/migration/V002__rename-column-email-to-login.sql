@@ -1,0 +1,1 @@
+ALTER TABLE teacher RENAME COLUMN email TO login;

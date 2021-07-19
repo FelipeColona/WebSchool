@@ -24,7 +24,7 @@ public class LoginController {
 
     @PostMapping("/validateTeacher")
     public String saveStudent(@ModelAttribute Teacher teacher) {
-        System.out.println(teacher.getEmail());
+        System.out.println(teacher.getLogin());
         System.out.println(teacher.getPassword());
         return "placeholder";
     }
