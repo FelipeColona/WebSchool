@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,15 +78,17 @@ public class TeacherService {
         String login = sbLogin.toString();
         String password = sbPassword.toString();
 
+        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
+
         Optional<Teacher> existingTeacher = teacherRepository.findByLogin(login);
 
         if(existingTeacher.isPresent()){
 
-            if(existingTeacher.get().getPassword() == password){
+            if(bcrypt.matches(password, existingTeacher.get().getPassword())){
                 this.genLoginAndPassword();
             }
         }
-        return new LoginAndPassword(login, password);
+        return new LoginAndPassword(login, bcrypt.encode(password));
     } 
 
     @Transactional

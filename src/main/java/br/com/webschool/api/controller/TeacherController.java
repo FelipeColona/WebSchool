@@ -26,7 +26,7 @@ import br.com.webschool.domain.service.TeacherService;
 import lombok.AllArgsConstructor;
 
 @RestController
-@RequestMapping("/teachers")
+@RequestMapping("/admin/teachers")
 @AllArgsConstructor
 public class TeacherController {
     private TeacherService teacherService;
