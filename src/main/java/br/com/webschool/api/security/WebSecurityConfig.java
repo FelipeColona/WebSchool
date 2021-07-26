@@ -29,7 +29,7 @@ public class WebSecurityConfig {
     public static class AdminWebSecurityAdapter extends WebSecurityConfigurerAdapter {
         @Override
         public void configure(HttpSecurity http) throws Exception {
-            http.csrf().disable().antMatcher("/admin/**").authorizeRequests().antMatchers("/admin/**").hasRole("ADMIN")
+            http.antMatcher("/admin/**").authorizeRequests().antMatchers("/admin/**").hasRole("ADMIN")
                     .and().formLogin().loginPage("/admin/login").permitAll().and().logout().logoutUrl("/admin/logout");
         }
     }
@@ -40,7 +40,7 @@ public class WebSecurityConfig {
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.csrf().disable().authorizeRequests().antMatchers("/teachers/**").authenticated()
+            http.authorizeRequests().antMatchers("/teachers/**").authenticated()
                     .and().formLogin().loginPage("/teachers/login")
                     .permitAll().and().logout().logoutUrl("/teachers/logout");
         }
