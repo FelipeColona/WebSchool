@@ -1,11 +1,15 @@
 package br.com.webschool.domain.model;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
@@ -28,7 +32,7 @@ public class Teacher implements UserDetails{
     private Long id;
 
     @NotBlank
-    @Size(max = 60)
+    @Size(max = 255)
     private String name;
 
     @NotBlank
@@ -38,6 +42,13 @@ public class Teacher implements UserDetails{
     @NotBlank
     @Size(max = 60)
     private String password;
+
+    @ManyToMany
+    @JoinTable(
+      name = "teacher_classroom", 
+      joinColumns = @JoinColumn(name = "teacher_id"), 
+      inverseJoinColumns = @JoinColumn(name = "classroom_id"))
+    List<Classroom> classrooms;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

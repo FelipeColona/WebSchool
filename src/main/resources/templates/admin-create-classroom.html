@@ -34,7 +34,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="/admin/get-classrooms">Delete / Update</a>
-                        <a class="dropdown-item" href="/admin/create-classroom">Create</a>
+                        <a class="dropdown-item" href="/admin/create-classrooms">Create</a>
                     </div>
                 </li>
 
@@ -62,10 +62,10 @@
                 <label for="name" class="mt-4">Name: </label>
                 <input type="text" id="name" name="name" class="form-control" required>
 
-                <label for="classrooms" class="mt-4">Classrooms: </label>
-                <input list="classrooms" id="searchInput" style="max-width: 15%;" value=""
+                <label for="teachers" class="mt-4">Teachers: </label>
+                <input list="teachers" id="searchInput" style="max-width: 15%;" value=""
                     class="form-control col-sm-6 custom-select custom-select-sm">
-                <datalist id="classrooms">
+                <datalist id="teachers">
                 </datalist>
 
                 <br>
@@ -130,19 +130,19 @@
                 if (searchInput.value) {
                     let xhr = new XMLHttpRequest()
 
-                    xhr.open("GET", `/admin/classroom/${searchInput.value}`, false)
+                    xhr.open("GET", `/admin/teacher/${searchInput.value}`, false)
                     xhr.send(null);
                     let data = JSON.parse(xhr.response)
 
-                    const classrooms = document.getElementById("classrooms")
-                    while (classrooms.firstChild) {
-                        classrooms.removeChild(classrooms.lastChild);
+                    const teachers = document.getElementById("teachers")
+                    while (teachers.firstChild) {
+                        teachers.removeChild(teachers.lastChild);
                     }
 
-                    data.forEach(classroom => {
+                    data.forEach(teacher => {
                         let nOption = document.createElement("option")
-                        nOption.setAttribute("value", classroom.name)
-                        classrooms.appendChild(nOption)
+                        nOption.setAttribute("value", teacher.name)
+                        teachers.appendChild(nOption)
                     })
                 }
             }
@@ -156,29 +156,29 @@
             const CSRF_HEADER = document.head.querySelector("meta[name=_csrf_header]").content
 
             var xhr = new XMLHttpRequest()
-            xhr.open("POST", "/admin/teachers", true)
+            xhr.open("POST", "/admin/classrooms", true)
             xhr.setRequestHeader('Content-Type', 'application/json')
             xhr.setRequestHeader(CSRF_HEADER, CSRF_TOKEN)
 
-            let classrooms = []
-            let classroomsNames = []
+            let teachers = []
+            let teachersNames = []
 
             let children = allClasses.children;
             for (let i = 0; i < children.length; i++) {
                 let tableChild = children[i];
-                classroomsNames.push(tableChild.textContent)
+                teachersNames.push(tableChild.textContent)
             }
             
-            let uniqueNames = classroomsNames.filter((item, pos ,self) => self.indexOf(item) == pos)
+            let uniqueNames = teachersNames.filter((item, pos ,self) => self.indexOf(item) == pos)
             uniqueNames.forEach( name => {
-                classrooms.push({
+                teachers.push({
                     name: name
                 })
             })
 
             let dataToBeSend = {
                 name: nameInput.value,
-                classrooms: classrooms
+                teachers: teachers
             }
 
             xhr.send(JSON.stringify(dataToBeSend));
@@ -206,12 +206,11 @@
                     const successDiv = document.createElement("div")
                     container.appendChild(successDiv);
                     successDiv.setAttribute("class", "alert alert-success")
-                    successDiv.innerHTML = `
-                    Teacher Created
-                    <br>
-                    <div>Login: ${data.login}</div>
-                    <div>Password: ${data.password}</div>
-                    `
+                    successDiv.innerHTML = "Classroom Created"
+
+                    setTimeout(() => {
+                        successDiv.parentNode.removeChild(successDiv)
+                    }, 2000)
                 }
             }
         });

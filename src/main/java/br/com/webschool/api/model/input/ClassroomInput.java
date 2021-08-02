@@ -6,23 +6,23 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import br.com.webschool.api.common.UniqueClassroom;
 import br.com.webschool.api.common.UniqueChecker;
-import br.com.webschool.api.common.UniqueTeacher;
-import br.com.webschool.domain.model.Classroom;
+import br.com.webschool.domain.model.Teacher;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class TeacherInput {
-    @UniqueTeacher(groups = UniqueChecker.class)
+public class ClassroomInput {
+    @UniqueClassroom(groups = UniqueChecker.class)
     @NotBlank(groups = UniqueChecker.class)
-    @Size(max = 255, groups = UniqueChecker.class)
+    @Size(groups = UniqueChecker.class, max = 60)
     @NotBlank
-    @Size(max = 255)
+    @Size(max = 60)
     private String name;
 
     @NotNull
     @NotNull(groups = UniqueChecker.class)
-    private List<Classroom> classrooms;
+    List<Teacher> teachers;
 }

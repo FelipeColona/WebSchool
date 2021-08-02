@@ -21,6 +21,10 @@ public class TeacherAssembler {
     private ModelMapper modelMapper;
 
     public TeacherModel toModel(Teacher teacher){
+        teacher.getClassrooms().forEach(classroom -> {
+            classroom.setTeachers(null);
+        });
+
         return modelMapper.map(teacher, TeacherModel.class);
     }
 
@@ -67,6 +71,12 @@ public class TeacherAssembler {
     }
 
     public ImprovedPage<TeacherModel> toPageModel(Page<Teacher> teachers){
+        teachers.getContent().forEach( teacher -> {
+            teacher.getClassrooms().forEach( classroom -> {
+                classroom.setTeachers(null);
+            });
+        });
+
         Page<Teacher> teachersCopy = teachers;
 
         List<TeacherModel> teachersList = teachersCopy.getContent().stream()

@@ -14,7 +14,7 @@
 	<name>webschool</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
-		<java.version>16</java.version>
+		<java.version>16.0.2</java.version>
 			<maven.compiler.target>16</maven.compiler.target>
 			<maven.compiler.source>16</maven.compiler.source>
 	</properties>

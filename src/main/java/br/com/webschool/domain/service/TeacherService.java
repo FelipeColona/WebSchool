@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import br.com.webschool.api.assembler.TeacherAssembler;
 import br.com.webschool.api.model.input.TeacherInput;
 import br.com.webschool.domain.exception.GeneralException;
+import br.com.webschool.domain.model.Classroom;
 import br.com.webschool.domain.model.Teacher;
+import br.com.webschool.domain.repository.ClassroomRepository;
 import br.com.webschool.domain.repository.TeacherRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +24,8 @@ import lombok.Setter;
 public class TeacherService {
     private TeacherRepository teacherRepository;
     private TeacherAssembler teacherAssembler;
+
+    private ClassroomRepository classroomRepository;
 
     @Getter
     @Setter
@@ -40,12 +44,34 @@ public class TeacherService {
     @Transactional
     public Teacher save(TeacherInput teacherInput){
 
+        teacherInput.getClassrooms().forEach( classroom -> {
+            Optional<Classroom> existingClassroom = classroomRepository.findByName(classroom.getName());
+
+            if(existingClassroom.isEmpty()){
+                throw new GeneralException("Class not found");
+            }
+
+            classroom.setId(existingClassroom.get().getId());
+        });
+
         Teacher teacher = teacherAssembler.toEntity(teacherInput);
         LoginAndPassword loginAndPassword = this.genLoginAndPassword();
         teacher.setLogin(loginAndPassword.getLogin());
-        teacher.setPassword(loginAndPassword.getPassword());
         
-        return teacherRepository.save(teacher);
+        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
+        String encodedPassword = bcrypt.encode(loginAndPassword.getPassword());
+
+        teacher.setPassword(encodedPassword);
+        Teacher savedTeacher = teacherRepository.save(teacher);
+
+        Teacher t1 = new Teacher();
+        t1.setId(savedTeacher.getId());
+        t1.setName(savedTeacher.getName());
+        t1.setLogin(savedTeacher.getLogin());
+        t1.setPassword(loginAndPassword.getPassword());
+        t1.setClassrooms(savedTeacher.getClassrooms());
+
+        return t1;
     }
 
     @Transactional
@@ -78,9 +104,9 @@ public class TeacherService {
         String login = sbLogin.toString();
         String password = sbPassword.toString();
 
-        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
-
         Optional<Teacher> existingTeacher = teacherRepository.findByLogin(login);
+
+        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
 
         if(existingTeacher.isPresent()){
 
@@ -88,7 +114,7 @@ public class TeacherService {
                 this.genLoginAndPassword();
             }
         }
-        return new LoginAndPassword(login, bcrypt.encode(password));
+        return new LoginAndPassword(login, password);
     } 
 
     @Transactional
@@ -96,12 +122,32 @@ public class TeacherService {
         Teacher teacher = teacherAssembler.toEntity(teacherInput);
 
         Teacher teacherFound = teacherRepository.findById(teacherId).get();
+        Optional<Teacher> teacherFound2 = teacherRepository.findByName(teacher.getName());
 
-        teacher.setId(teacherId);
-        teacher.setLogin(teacherFound.getLogin());
-        teacher.setPassword(teacherFound.getPassword());
-
-        return teacherRepository.save(teacher);
+        if(teacherFound2.isEmpty() || teacherFound.getName().equals(teacher.getName())){
+            teacher.setId(teacherId);
+            teacher.setLogin(teacherFound.getLogin());
+            teacher.setPassword(teacherFound.getPassword());
+    
+            if(teacher.getClassrooms().isEmpty()){
+                List<Classroom> l1 = new ArrayList<>();
+                teacher.setClassrooms(l1);
+            }else{
+                teacher.getClassrooms().forEach( classroom -> {
+                    Optional<Classroom> classroomFound = classroomRepository.findByName(classroom.getName());
+    
+                    if(classroomFound.isEmpty()){
+                        throw new GeneralException("Classroom not found");
+                    }
+    
+                    classroom.setId(classroomFound.get().getId());
+                });
+            }
+    
+            return teacherRepository.save(teacher);
+        }else{
+            throw new GeneralException("Teacher name must be unique");
+        }
     }
 
     @Transactional

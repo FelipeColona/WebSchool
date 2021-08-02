@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,12 +24,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.webschool.api.assembler.ClassroomAssembler;
 import br.com.webschool.api.assembler.TeacherAssembler;
+import br.com.webschool.api.assembler.ClassroomAssembler.ImprovedClassroomPage;
 import br.com.webschool.api.assembler.TeacherAssembler.ImprovedPage;
+import br.com.webschool.api.common.UniqueChecker;
+import br.com.webschool.api.model.ClassroomModel;
 import br.com.webschool.api.model.TeacherModel;
+import br.com.webschool.api.model.input.ClassroomInput;
 import br.com.webschool.api.model.input.TeacherInput;
+import br.com.webschool.domain.model.Classroom;
 import br.com.webschool.domain.model.Teacher;
+import br.com.webschool.domain.repository.ClassroomRepository;
 import br.com.webschool.domain.repository.TeacherRepository;
+import br.com.webschool.domain.service.ClassroomService;
 import br.com.webschool.domain.service.TeacherService;
 import lombok.AllArgsConstructor;
 
@@ -39,6 +48,10 @@ public class AdminController {
     private TeacherService teacherService;
     private TeacherRepository teacherRepository;
     private TeacherAssembler teacherAssembler;
+
+    private ClassroomRepository classroomRepository;
+    private ClassroomAssembler classroomAssembler;
+    private ClassroomService classroomService;
 
     @Controller
     public class PageRenderer {
@@ -55,15 +68,27 @@ public class AdminController {
         @GetMapping("/admin/get-teachers")
         public String getTeachers(Model model, @PageableDefault(page = 0, size = 5, sort = "name", direction = Direction.ASC) Pageable pageable){
             Page<Teacher> allTeachers = teacherRepository.findAll(pageable);
-
             model.addAttribute("allteachers", teacherAssembler.toPageModel(allTeachers));
             
             return "admin-get-teachers";
         }
 
         @GetMapping("/admin/create-teacher")
-        public String create(){
+        public String createTeacher(){
             return "admin-create-teacher";
+        }
+
+        @GetMapping("/admin/create-classroom")
+        public String createClassroom(){
+            return "admin-create-classroom";
+        }
+
+        @GetMapping("/admin/get-classrooms")
+        public String getClassrooms(Model model, @PageableDefault(page = 0, size = 5, sort = "name", direction = Direction.ASC) Pageable pageable){
+            Page<Classroom> allClassrooms = classroomRepository.findAll(pageable);
+            model.addAttribute("allclassrooms", classroomAssembler.toPageModel(allClassrooms));
+            
+            return "admin-get-classrooms";
         }
     }
 
@@ -93,10 +118,10 @@ public class AdminController {
     
     @PostMapping("/teachers")
     @ResponseStatus(HttpStatus.CREATED)
-    public TeacherModel createTeacher(@RequestBody @Valid TeacherInput teacherInput){
+    public Teacher createTeacher(@RequestBody @Validated(UniqueChecker.class) TeacherInput teacherInput){
         Teacher savedTeacher = teacherService.save(teacherInput);
 
-        return teacherAssembler.toModel(savedTeacher);
+        return savedTeacher;
     }
 
     @PutMapping("/teachers/{teacherId}")
@@ -119,5 +144,62 @@ public class AdminController {
         teacherService.delete(teacherId);
 
         return ResponseEntity.noContent().build();
+    }
+
+
+
+    @GetMapping("/classrooms")
+    public ImprovedClassroomPage<ClassroomModel> getAllClassrooms(@PageableDefault(page = 0, size = 5, sort = "name", direction = Direction.ASC) Pageable pageable){
+        Page<Classroom> classrooms = classroomRepository.findAll(pageable);
+
+        return classroomAssembler.toPageModel(classrooms);
+    }
+
+    @GetMapping("/classrooms/{classroomId}")
+    public ResponseEntity<ClassroomModel> getOneClassroom(@PathVariable Long classroomId){
+        Optional<Classroom> classroom = classroomRepository.findById(classroomId);
+        if(classroom.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(classroomAssembler.toModel(classroom.get()));
+    }
+
+    @GetMapping("/classroom/{classroomName}")
+    public List<ClassroomModel> getClassroomByPartialName(@PathVariable String classroomName){
+        List<Classroom> classrooms = classroomRepository.findByPartialMatching(classroomName);
+
+        return classroomAssembler.toCollectionModel(classrooms);
+    }
+
+
+    @PostMapping("/classrooms")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ClassroomModel createClassroom(@RequestBody @Validated(UniqueChecker.class) ClassroomInput classroomInput){
+        Classroom savedClassroom = classroomService.save(classroomInput);
+
+        return classroomAssembler.toModel(savedClassroom);
+    }
+
+    @DeleteMapping("/classrooms/{classroomId}")
+    public ResponseEntity<Void> deleteClassroom(@PathVariable Long classroomId){
+        if(!classroomRepository.existsById(classroomId)){
+            return ResponseEntity.notFound().build();
+        }
+
+        classroomService.delete(classroomId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/classrooms/{classroomId}")
+    public ResponseEntity<ClassroomModel> updateClassroom(@PathVariable Long classroomId, @RequestBody @Valid ClassroomInput classroomInput){
+        if(!classroomRepository.existsById(classroomId)){
+            return ResponseEntity.notFound().build();
+        }
+
+        Classroom savedClassroom = classroomService.update(classroomId, classroomInput);
+
+        return ResponseEntity.ok(classroomAssembler.toModel(savedClassroom));
     }
 }

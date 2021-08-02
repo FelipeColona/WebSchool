@@ -11,6 +11,7 @@ import br.com.webschool.domain.model.Teacher;
 
 @Repository
 public interface TeacherRepository extends JpaRepository<Teacher, Long> {
+    Optional<Teacher> findByName(String name);
     Optional<Teacher> findByLogin(String login);
 
     @Query(

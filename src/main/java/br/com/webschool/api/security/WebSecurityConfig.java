@@ -31,6 +31,8 @@ public class WebSecurityConfig {
         public void configure(HttpSecurity http) throws Exception {
             http.antMatcher("/admin/**").authorizeRequests().antMatchers("/admin/**").hasRole("ADMIN")
                     .and().formLogin().loginPage("/admin/login").permitAll().and().logout().logoutUrl("/admin/logout");
+
+            //http.httpBasic();
         }
     }
 
@@ -43,6 +45,8 @@ public class WebSecurityConfig {
             http.authorizeRequests().antMatchers("/teachers/**").authenticated()
                     .and().formLogin().loginPage("/teachers/login")
                     .permitAll().and().logout().logoutUrl("/teachers/logout");
+            
+            //http.httpBasic();
         }
 
         @Override
