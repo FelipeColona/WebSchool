@@ -419,7 +419,9 @@
                                 errorDiv.innerHTML += `${field.name} ${field.message} <br>`
                             })
                         } else {
-                            errorDiv.innerHTML += "Classroom not Found"
+                            errorDiv.innerHTML += "Teacher name must be unique"
+
+                            //classroom not found
                         }
                     } else {
                         nameInput.style.fontStyle = "normal"
