@@ -20,7 +20,8 @@ public class WebSecurityConfig {
         @Override
         public void configure(HttpSecurity http) throws Exception {
             http.antMatcher("/admin/**").authorizeRequests().antMatchers("/admin/**").hasRole("ADMIN")
-                    .and().formLogin().loginPage("/admin/login").permitAll().and().logout().logoutUrl("/admin/logout");
+                    .and().formLogin().loginPage("/admin/login").permitAll().and().logout().logoutUrl("/admin/logout")
+                    .and().exceptionHandling().accessDeniedPage("/403");
 
             //http.httpBasic();
         }
@@ -40,15 +41,15 @@ public class WebSecurityConfig {
 
         @Autowired
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-            auth.userDetailsService(teacherDetailsService).passwordEncoder(new BCryptPasswordEncoder()).and()
-                    .inMemoryAuthentication().withUser("admin").password("{noop}123").roles("ADMIN");
+            auth.userDetailsService(teacherDetailsService).passwordEncoder(new BCryptPasswordEncoder());
         }
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.antMatcher("/teachers/**").authorizeRequests().antMatchers("/teachers/**").authenticated()
                     .and().formLogin().loginPage("/teachers/login")
-                    .permitAll().and().logout().logoutUrl("/teachers/logout");
+                    .permitAll().and().logout().logoutUrl("/teachers/logout")
+                    .and().exceptionHandling().accessDeniedPage("/403");
             
             //http.httpBasic();
         }
@@ -76,7 +77,8 @@ public class WebSecurityConfig {
             protected void configure(HttpSecurity http) throws Exception {
                 http.antMatcher("/students/**").authorizeRequests().antMatchers("/students/**").authenticated()
                         .and().formLogin().loginPage("/students/login")
-                        .permitAll().and().logout().logoutUrl("/students/logout");
+                        .permitAll().and().logout().logoutUrl("/students/logout")
+                        .and().exceptionHandling().accessDeniedPage("/403");
                 
                 //http.httpBasic();
             }

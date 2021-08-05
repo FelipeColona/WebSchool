@@ -6,7 +6,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.webschool.domain.exception.GeneralException;
 import br.com.webschool.domain.model.Teacher;
 import br.com.webschool.domain.repository.TeacherRepository;
 import lombok.AllArgsConstructor;
@@ -35,8 +33,8 @@ public class TeacherController {
         @GetMapping("/teachers")
         public String home(Model model){
             Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    
-            if (principal instanceof UserDetails) {
+
+            if (this.isTeacher(principal)) {
                 String username = ((Teacher)principal).getName();
                 
                 Teacher currentTeacher = teacherRepository.findByName(username).get();
@@ -45,7 +43,7 @@ public class TeacherController {
                 return "teachers-home";
                 
             } else {
-                throw new GeneralException("ERROR");
+                return "redirect:" + "/403";
             }
         }
 
@@ -53,7 +51,7 @@ public class TeacherController {
         public String temp(@PathVariable String classroomNameUrl, Model model, HttpServletRequest request){
             Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            if(principal instanceof UserDetails){
+            if(this.isTeacher(principal)){
                 String username = ((Teacher)principal).getName();
 
                 String classroomName = classroomNameUrl.replaceAll("_", " ");
@@ -80,9 +78,17 @@ public class TeacherController {
                 return "redirect:" + request.getRequestURL().delete(index, request.getRequestURL().length()) + "?error";
                 
             }else{
-                throw new GeneralException("ERROR");
+                return "redirect:" + "/403";
+            }
+        }
+
+        public boolean isTeacher(Object principal) {
+            try{
+                ((Teacher)principal).getName();
+                return true;
+            }catch (ClassCastException ex){
+                return false;
             }
         }
     }
-
 }
