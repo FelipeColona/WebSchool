@@ -12,16 +12,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @EnableWebSecurity
 public class WebSecurityConfig {
-
-    @Autowired
-    private ImplementsUserDetailsService userDetailsService;
-
-    //Global Config
-    @Autowired
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(new BCryptPasswordEncoder()).and()
-                .inMemoryAuthentication().withUser("admin").password("{noop}123").roles("ADMIN");
-    }
     
     //Admin Config
     @Configuration
@@ -34,15 +24,29 @@ public class WebSecurityConfig {
 
             //http.httpBasic();
         }
+
+        @Autowired
+        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+            auth.inMemoryAuthentication().withUser("admin").password("{noop}123").roles("ADMIN");
+        }
     }
 
     //Teacher Config
     @Configuration
+    @Order(2)
     public static class TeacherWebSecurityAdapter extends WebSecurityConfigurerAdapter {
+        @Autowired
+        private ImplementsTeacherDetailsService teacherDetailsService;
+
+        @Autowired
+        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+            auth.userDetailsService(teacherDetailsService).passwordEncoder(new BCryptPasswordEncoder()).and()
+                    .inMemoryAuthentication().withUser("admin").password("{noop}123").roles("ADMIN");
+        }
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.authorizeRequests().antMatchers("/teachers/**").authenticated()
+            http.antMatcher("/teachers/**").authorizeRequests().antMatchers("/teachers/**").authenticated()
                     .and().formLogin().loginPage("/teachers/login")
                     .permitAll().and().logout().logoutUrl("/teachers/logout");
             
@@ -55,5 +59,33 @@ public class WebSecurityConfig {
         }
 
     }
+
+        //Student Config
+        @Configuration
+        @Order(3)
+        public static class StudentWebSecurityAdapter extends WebSecurityConfigurerAdapter {
+            @Autowired
+            private ImplementsStudentDetailsService studentDetailsService;
+    
+            @Autowired
+            protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+                auth.userDetailsService(studentDetailsService).passwordEncoder(new BCryptPasswordEncoder());
+            }
+
+            @Override
+            protected void configure(HttpSecurity http) throws Exception {
+                http.antMatcher("/students/**").authorizeRequests().antMatchers("/students/**").authenticated()
+                        .and().formLogin().loginPage("/students/login")
+                        .permitAll().and().logout().logoutUrl("/students/logout");
+                
+                //http.httpBasic();
+            }
+    
+            @Override
+            public void configure(WebSecurity web) throws Exception {
+                web.ignoring().antMatchers("/templates/**, /materialize/**", "/style/**");
+            }
+    
+        }
 
 }

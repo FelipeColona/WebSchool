@@ -8,25 +8,25 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
-import br.com.webschool.domain.model.Teacher;
-import br.com.webschool.domain.repository.TeacherRepository;
+import br.com.webschool.domain.model.Student;
+import br.com.webschool.domain.repository.StudentRepository;
 
 @Repository
-public class ImplementsUserDetailsService implements UserDetailsService{
+public class ImplementsStudentDetailsService implements UserDetailsService{
 
     @Autowired
-    private TeacherRepository teacherRepository; 
+    private StudentRepository studentRepository; 
 
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
 
-        Optional<Teacher> teacher = teacherRepository.findByLogin(login);
+        Optional<Student> student = studentRepository.findByLogin(login);
 
-        if(teacher.isEmpty()){
+        if(student.isEmpty()){
             throw new UsernameNotFoundException("User Not Found");
         }
 
-        return teacher.get();
+        return student.get();
     }
     
 }

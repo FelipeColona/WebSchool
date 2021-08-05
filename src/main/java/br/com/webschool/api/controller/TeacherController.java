@@ -40,6 +40,7 @@ public class TeacherController {
                 String username = ((Teacher)principal).getName();
                 
                 Teacher currentTeacher = teacherRepository.findByName(username).get();
+
                 model.addAttribute("classrooms", currentTeacher.getClassrooms());
                 return "teachers-home";
                 
@@ -85,5 +86,3 @@ public class TeacherController {
     }
 
 }
-
-//System.out.println(request.getRequestURL().toString());
