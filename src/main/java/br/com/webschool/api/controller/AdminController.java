@@ -25,17 +25,22 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.webschool.api.assembler.ClassroomAssembler;
+import br.com.webschool.api.assembler.StudentAssembler;
 import br.com.webschool.api.assembler.TeacherAssembler;
 import br.com.webschool.api.assembler.ClassroomAssembler.ImprovedClassroomPage;
 import br.com.webschool.api.assembler.TeacherAssembler.ImprovedPage;
+import br.com.webschool.api.assembler.StudentAssembler.ImprovedStudentPage;
 import br.com.webschool.api.common.UniqueChecker;
 import br.com.webschool.api.model.ClassroomModel;
+import br.com.webschool.api.model.StudentModel;
 import br.com.webschool.api.model.TeacherModel;
 import br.com.webschool.api.model.input.ClassroomInput;
 import br.com.webschool.api.model.input.TeacherInput;
 import br.com.webschool.domain.model.Classroom;
+import br.com.webschool.domain.model.Student;
 import br.com.webschool.domain.model.Teacher;
 import br.com.webschool.domain.repository.ClassroomRepository;
+import br.com.webschool.domain.repository.StudentRepository;
 import br.com.webschool.domain.repository.TeacherRepository;
 import br.com.webschool.domain.service.ClassroomService;
 import br.com.webschool.domain.service.TeacherService;
@@ -52,6 +57,9 @@ public class AdminController {
     private ClassroomRepository classroomRepository;
     private ClassroomAssembler classroomAssembler;
     private ClassroomService classroomService;
+
+    private StudentRepository studentRepository;
+    private StudentAssembler studentAssembler;
 
     @Controller
     public class PageRenderer {
@@ -201,5 +209,29 @@ public class AdminController {
         Classroom savedClassroom = classroomService.update(classroomId, classroomInput);
 
         return ResponseEntity.ok(classroomAssembler.toModel(savedClassroom));
+    }
+
+    @GetMapping("/students")
+    public ImprovedStudentPage<StudentModel> getAllStudents(@PageableDefault(page = 0, size = 5, sort = "name", direction = Direction.ASC) Pageable pageable){
+        Page<Student> students = studentRepository.findAll(pageable);
+
+        return studentAssembler.toPageModel(students);
+    }
+
+    @GetMapping("/students/{studentId}")
+    public ResponseEntity<StudentModel> getOneStudent(@PathVariable Long studentId){
+        Optional<Student> student = studentRepository.findById(studentId);
+        if(student.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(studentAssembler.toModel(student.get()));
+    }
+
+    @GetMapping("/student/{studentName}")
+    public List<StudentModel> getStudentByPartialName(@PathVariable String studentName){
+        List<Student> students = studentRepository.findByPartialMatching(studentName);
+
+        return studentAssembler.toCollectionModel(students);
     }
 }
