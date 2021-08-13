@@ -1,7 +1,7 @@
 package br.com.webschool.api.model.input;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import br.com.webschool.api.common.UniqueChecker;
@@ -20,7 +20,7 @@ public class StudentInput {
     @Size(max = 255)
     private String name;
 
-    @NotEmpty
-    @NotEmpty(groups = UniqueChecker.class)
+    @NotNull
+    @NotNull(groups = UniqueChecker.class)
     private Classroom classroom;
 }

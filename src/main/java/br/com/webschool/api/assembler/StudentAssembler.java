@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import br.com.webschool.api.model.StudentModel;
+import br.com.webschool.api.model.input.StudentInput;
 import br.com.webschool.domain.model.Student;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,13 +21,8 @@ public class StudentAssembler {
     private ModelMapper modelMapper;
 
     public StudentModel toModel(Student student){
-        student.getClassroom().getTeachers().forEach( teacher -> {
-            teacher.setClassrooms(null);
-        });
-
-        student.getClassroom().getStudents().forEach( student2 -> {
-            student.setClassroom(null);
-        });
+        student.getClassroom().setTeachers(null);
+        student.getClassroom().setStudents(null);
         
         StudentModel res = modelMapper.map(student, StudentModel.class);
 
@@ -98,5 +94,9 @@ public class StudentAssembler {
         ImprovedStudentPage<StudentModel> studentsPage = new ImprovedStudentPage<StudentModel>(studentsList, students.getPageable(), students.isLast(), students.getTotalElements(), students.getTotalPages(), students.getSize(), students.getNumber(), students.isFirst(), students.getNumberOfElements(), students.isEmpty());
 
         return studentsPage;
+    }
+
+    public Student toEntity(StudentInput studentInput){
+        return modelMapper.map(studentInput, Student.class);
     }
 }

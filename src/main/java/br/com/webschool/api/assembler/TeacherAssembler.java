@@ -23,6 +23,7 @@ public class TeacherAssembler {
     public TeacherModel toModel(Teacher teacher){
         teacher.getClassrooms().forEach(classroom -> {
             classroom.setTeachers(null);
+            classroom.setStudents(null);
         });
 
         return modelMapper.map(teacher, TeacherModel.class);

@@ -1,6 +1,7 @@
 package br.com.webschool.api.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -12,18 +13,22 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @EnableWebSecurity
 public class WebSecurityConfig {
-    
     //Admin Config
     @Configuration
     @Order(1)
     public static class AdminWebSecurityAdapter extends WebSecurityConfigurerAdapter {
+        @Value("${insomnia.mode}")
+        private String insomniaMode;
+
         @Override
         public void configure(HttpSecurity http) throws Exception {
             http.antMatcher("/admin/**").authorizeRequests().antMatchers("/admin/**").hasRole("ADMIN")
                     .and().formLogin().loginPage("/admin/login").permitAll().and().logout().logoutUrl("/admin/logout")
                     .and().exceptionHandling().accessDeniedPage("/403");
 
-            //http.httpBasic();
+            if(insomniaMode.equals("activated")){
+                http.csrf().disable().httpBasic();
+            }
         }
 
         @Autowired
@@ -36,6 +41,9 @@ public class WebSecurityConfig {
     @Configuration
     @Order(2)
     public static class TeacherWebSecurityAdapter extends WebSecurityConfigurerAdapter {
+        @Value("${insomnia.mode}")
+        private String insomniaMode;
+
         @Autowired
         private ImplementsTeacherDetailsService teacherDetailsService;
 
@@ -51,7 +59,9 @@ public class WebSecurityConfig {
                     .permitAll().and().logout().logoutUrl("/teachers/logout")
                     .and().exceptionHandling().accessDeniedPage("/403");
             
-            //http.httpBasic();
+            if(insomniaMode.equals("activated")){
+                http.csrf().disable().httpBasic();
+            }
         }
 
         @Override
@@ -65,6 +75,9 @@ public class WebSecurityConfig {
         @Configuration
         @Order(3)
         public static class StudentWebSecurityAdapter extends WebSecurityConfigurerAdapter {
+            @Value("${insomnia.mode}")
+            private String insomniaMode;
+
             @Autowired
             private ImplementsStudentDetailsService studentDetailsService;
     
@@ -80,7 +93,9 @@ public class WebSecurityConfig {
                         .permitAll().and().logout().logoutUrl("/students/logout")
                         .and().exceptionHandling().accessDeniedPage("/403");
                 
-                //http.httpBasic();
+                if(insomniaMode.equals("activated")){
+                    http.csrf().disable().httpBasic();
+                }
             }
     
             @Override

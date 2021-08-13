@@ -35,6 +35,7 @@ import br.com.webschool.api.model.ClassroomModel;
 import br.com.webschool.api.model.StudentModel;
 import br.com.webschool.api.model.TeacherModel;
 import br.com.webschool.api.model.input.ClassroomInput;
+import br.com.webschool.api.model.input.StudentInput;
 import br.com.webschool.api.model.input.TeacherInput;
 import br.com.webschool.domain.model.Classroom;
 import br.com.webschool.domain.model.Student;
@@ -43,6 +44,7 @@ import br.com.webschool.domain.repository.ClassroomRepository;
 import br.com.webschool.domain.repository.StudentRepository;
 import br.com.webschool.domain.repository.TeacherRepository;
 import br.com.webschool.domain.service.ClassroomService;
+import br.com.webschool.domain.service.StudentService;
 import br.com.webschool.domain.service.TeacherService;
 import lombok.AllArgsConstructor;
 
@@ -60,6 +62,7 @@ public class AdminController {
 
     private StudentRepository studentRepository;
     private StudentAssembler studentAssembler;
+    private StudentService studentService;
 
     @Controller
     public class PageRenderer {
@@ -233,5 +236,35 @@ public class AdminController {
         List<Student> students = studentRepository.findByPartialMatching(studentName);
 
         return studentAssembler.toCollectionModel(students);
+    }
+
+    @PostMapping("/students")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Student createStudent(@RequestBody @Validated(UniqueChecker.class) StudentInput studentInput){
+        Student savedStudent = studentService.save(studentInput);
+
+        return savedStudent;
+    }
+
+    @DeleteMapping("/students/{studentId}")
+    public ResponseEntity<Void> deleteStudent(@PathVariable Long studentId){
+        if(!studentRepository.existsById(studentId)){
+            return ResponseEntity.notFound().build();
+        }
+
+        studentService.delete(studentId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/students/{studentId}")
+    public ResponseEntity<StudentModel> updateStudent(@PathVariable Long studentId, @RequestBody @Valid StudentInput classroomInput){
+        if(!studentRepository.existsById(studentId)){
+            return ResponseEntity.notFound().build();
+        }
+
+        Student savedStudent = studentService.update(studentId, classroomInput);
+
+        return ResponseEntity.ok(studentAssembler.toModel(savedStudent));
     }
 }

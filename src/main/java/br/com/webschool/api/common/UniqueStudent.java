@@ -10,7 +10,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({FIELD})
 @Retention(RUNTIME)
-@Constraint(validatedBy = UniqueTeacherValidator.class)
+@Constraint(validatedBy = UniqueStudentValidator.class)
 public @interface UniqueStudent {
     String message() default "Student name must be unique";
  
