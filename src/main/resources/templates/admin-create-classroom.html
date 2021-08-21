@@ -34,11 +34,11 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="/admin/get-classrooms">Delete / Update</a>
-                        <a class="dropdown-item" href="/admin/create-classrooms">Create</a>
+                        <a class="dropdown-item" href="/admin/create-classroom">Create</a>
                     </div>
                 </li>
 
-                <li class="nav-item dropdown">
+                <li class="nav-item dropdown" style="padding-right: 25px;">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Teachers
@@ -46,6 +46,17 @@
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="/admin/get-teachers">Delete / Update</a>
                         <a class="dropdown-item" href="/admin/create-teacher">Create</a>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown" style="padding-right: 25px;">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Students
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="/admin/get-students">Delete / Update</a>
+                        <a class="dropdown-item" href="/admin/create-student">Create</a>
                     </div>
                 </li>
 
@@ -68,16 +79,23 @@
                 <datalist id="teachers">
                 </datalist>
 
+                <br/>
+
+                <div id="allClasses" style="display: flex; flex-direction: row"></div>
+
+
+                <label for="students" class="mt-4">Students: </label>
+                <br>
+                <input list="students" id="searchInputStudents" style="max-width: 15%;" value=""
+                    class="form-control col-sm-6 custom-select custom-select-sm">
+                <datalist id="students">
+                </datalist>
+
                 <br>
 
-                <div id="allClasses" style="display: flex; flex-direction: row">
-                    <!--                      <div class="alert alert-success alert-dismissible fade show" role="alert" style="max-width: 15%;">
-                        3-A Manhã
-                        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
-                    </div> -->
-                </div>
+                <div id="allClasses2" style="display: flex; flex-direction: row"></div>
 
-                <br>
+                <br/>
 
                 <button class="btn btn-success mt-3" type="submit">Create</button>
             </form>
@@ -99,7 +117,9 @@
         const form = document.getElementById("form");
         const nameInput = document.getElementById("name")
         const searchInput = document.getElementById("searchInput")
+        const searchInputStudents = document.getElementById("searchInputStudents")
         const allClasses = document.getElementById("allClasses")
+        const allClasses2 = document.getElementById("allClasses2")
 
         function wrapEventCallback(callback) {
             var args = Array.prototype.slice.call(arguments, 1);
@@ -148,6 +168,46 @@
             }
         }, false)
 
+        searchInputStudents.addEventListener("input", function (e) {
+            if (e.inputType === "insertReplacementText") {
+                let alertDiv = document.createElement("div")
+                alertDiv.setAttribute("class", "alert alert-success alert-dismissible fade show")
+                alertDiv.setAttribute("role", "alert")
+                alertDiv.style.maxWidth = "15%"
+                alertDiv.style.marginLeft = "20px"
+                allClasses2.appendChild(alertDiv)
+                alertDiv.innerHTML = e.data
+
+                let buttonDisappear = document.createElement("button")
+                buttonDisappear.setAttribute("class", "btn-close")
+                buttonDisappear.setAttribute("data-dismiss", "alert")
+                buttonDisappear.setAttribute("aria-label", "Close")
+                alertDiv.appendChild(buttonDisappear)
+
+                searchInputStudents.value = ""
+
+            } else {
+                if (searchInputStudents.value) {
+                    let xhr = new XMLHttpRequest()
+
+                    xhr.open("GET", `/admin/student/${searchInputStudents.value}`, false)
+                    xhr.send(null);
+                    let data = JSON.parse(xhr.response)
+
+                    const students = document.getElementById("students")
+                    while (students.firstChild) {
+                        students.removeChild(students.lastChild);
+                    }
+
+                    data.forEach(student => {
+                        let nOption = document.createElement("option")
+                        nOption.setAttribute("value", student.name)
+                        students.appendChild(nOption)
+                    })
+                }
+            }
+        }, false)
+
 
         form.addEventListener('submit', event => {
             event.preventDefault()
@@ -176,9 +236,26 @@
                 })
             })
 
+            let students = []
+            let studentsNames = []
+
+            let childrenS = allClasses2.children;
+            for (let i = 0; i < childrenS.length; i++) {
+                let tableChild = childrenS[i];
+                studentsNames.push(tableChild.textContent)
+            }
+            
+            let uniqueNamesS = studentsNames.filter((item, pos ,self) => self.indexOf(item) == pos)
+            uniqueNamesS.forEach( name => {
+                students.push({
+                    name: name
+                })
+            })
+
             let dataToBeSend = {
                 name: nameInput.value,
-                teachers: teachers
+                teachers: teachers,
+                students: students
             }
 
             xhr.send(JSON.stringify(dataToBeSend));

@@ -24,6 +24,10 @@ public class ClassroomAssembler {
         classroom.getTeachers().forEach(teacher -> {
             teacher.setClassrooms(null);
         });
+
+        classroom.getStudents().forEach(student -> {
+            student.setClassroom(null);
+        });
         
         ClassroomModel res = modelMapper.map(classroom, ClassroomModel.class);
 
@@ -83,9 +87,15 @@ public class ClassroomAssembler {
 
     public ImprovedClassroomPage<ClassroomModel> toPageModel(Page<Classroom> classrooms){
 
-        classrooms.getContent().forEach(classroom -> {
-            classroom.getTeachers().forEach(teacher -> {
+        classrooms.getContent().forEach( classroom -> {
+            classroom.getTeachers().forEach( teacher -> {
                 teacher.setClassrooms(null);
+            });
+        });
+
+        classrooms.getContent().forEach( classroom -> {
+            classroom.getStudents().forEach( student -> {
+                student.setClassroom(null);
             });
         });
 

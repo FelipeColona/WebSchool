@@ -84,9 +84,23 @@ public class AdminController {
             return "admin-get-teachers";
         }
 
+        @GetMapping("/admin/get-students")
+        public String getStudents(Model model, @PageableDefault(page = 0, size = 5, sort = "name", direction = Direction.ASC) Pageable pageable){
+            Page<Student> allStudents = studentRepository.findAll(pageable);
+            ImprovedStudentPage<StudentModel> res = studentAssembler.toPageModel(allStudents);
+            model.addAttribute("allstudents", res);
+        
+            return "admin-get-students";
+        }
+
         @GetMapping("/admin/create-teacher")
         public String createTeacher(){
             return "admin-create-teacher";
+        }
+
+        @GetMapping("/admin/create-student")
+        public String createStudent(){
+            return "admin-create-student";
         }
 
         @GetMapping("/admin/create-classroom")
@@ -98,6 +112,7 @@ public class AdminController {
         public String getClassrooms(Model model, @PageableDefault(page = 0, size = 5, sort = "name", direction = Direction.ASC) Pageable pageable){
             Page<Classroom> allClassrooms = classroomRepository.findAll(pageable);
             model.addAttribute("allclassrooms", classroomAssembler.toPageModel(allClassrooms));
+            //System.out.println(classroomAssembler.toPageModel(allClassrooms).getContent().get(index)
             
             return "admin-get-classrooms";
         }

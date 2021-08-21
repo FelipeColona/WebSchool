@@ -8,6 +8,7 @@ import javax.validation.constraints.Size;
 
 import br.com.webschool.api.common.UniqueClassroom;
 import br.com.webschool.api.common.UniqueChecker;
+import br.com.webschool.domain.model.Student;
 import br.com.webschool.domain.model.Teacher;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,4 +26,8 @@ public class ClassroomInput {
     @NotNull
     @NotNull(groups = UniqueChecker.class)
     List<Teacher> teachers;
+
+    @NotNull
+    @NotNull(groups = UniqueChecker.class)
+    List<Student> students;
 }

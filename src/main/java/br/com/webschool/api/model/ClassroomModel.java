@@ -19,5 +19,7 @@ public class ClassroomModel {
     @Size(max = 60)
     private String name;
 
-    List<TeacherModel> teachers;
+    private List<TeacherModel> teachers;
+
+    private List<StudentModel> students;
 }

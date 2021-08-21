@@ -25,7 +25,25 @@ public interface ClassroomRepository extends JpaRepository<Classroom, Long>{
         value = "DELETE FROM teacher_classroom WHERE classroom_id = ?1", 
         nativeQuery = true
     )
-    int removeRelationshipByClassroomId(Long id);
+    int removeTeacherRelationshipByClassroomId(Long id);
+
+    @Modifying
+    @Query(
+        value = "UPDATE student " +
+        "SET student.classroom_id = NULL " + 
+        "WHERE student.classroom_id = ?1",
+        nativeQuery = true
+    )
+    int removeAllStudentRelationshipByClassroomId(Long id);
+
+    @Modifying
+    @Query(
+        value = "UPDATE student " +
+        "SET student.classroom_id = ?1 " + 
+        "WHERE student.id = ?2",
+        nativeQuery = true
+    )
+    void removeStudentRelationshipByClassroomId(Long classroomId, Long studentId);
 
     @Modifying
     @Query(

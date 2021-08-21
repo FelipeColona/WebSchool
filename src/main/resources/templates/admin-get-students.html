@@ -8,7 +8,7 @@
     <meta th:name="_csrf" th:content="${_csrf.token}" />
     <meta th:name="_csrf_header" th:content="${_csrf.headerName}" />
 
-    <title>Get Teachers</title>
+    <title>Get Students</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
@@ -68,10 +68,10 @@
 
     <div id="containerMessages">
         <div th:if="${param.error}" id="error" class="alert alert-danger">
-            Could not delete the teacher
+            Could not delete the student
         </div>
         <div th:if="${param.success}" id="success" class="alert alert-success">
-            Teacher Deleted
+            Student Deleted
         </div>
     </div>
 
@@ -86,29 +86,20 @@
                 <tr>
                     <th scope="col">Login</th>
                     <th scope="col">Name</th>
-                    <th scope="col">Classrooms</th>
+                    <th scope="col">Classroom</th>
                     <th scope="col"></th>
                 </tr>
             </thead>
             <tbody id="container">
-                <tr th:each="teacher: ${allteachers.content}">
-                    <td th:text="${teacher.login}"></td>
-                    <td th:id="${teacher.id}" th:text="${teacher.name}" th:attr="onclick=|changeStyle('${teacher.id}')|"
+                <tr th:each="student: ${allstudents.content}">
+                    <td th:text="${student.login}"></td>
+                    <td th:id="${student.id}" th:text="${student.name}" th:attr="onclick=|changeStyle('${student.id}')|"
                         spellcheck="false" contenteditable="true"></td>
-                    <td th:id="'classrooms' + ${teacher.id}">
-                        <span class="btn btn-secondary dropdown-toggle"
-                            th:attr="onclick=|toggleClassrooms('${teacher.name}')|">See all classrooms</span>
-                        <div th:id="${teacher.name}" contenteditable="true" onclick="changeStyle(0)"
-                            style="display: none;">
-                            <div th:each="classroom: ${teacher.classrooms}">
-                                <span th:text="${classroom.name}" spellcheck="false"></span>
-                            </div>
-                        </div>
-                    </td>
+                    <td th:id="'classrooms' + ${student.id}" th:attr="onclick=|changeStyle('${student.id}')|" th:text="${student.classroom?.name}" spellcheck="false" contenteditable="true"></td>
                     <td>
-                        <i th:attr="onclick=|handleClickUpdate('${teacher.id}')|" class="fas fa-pen-alt"
+                        <i th:attr="onclick=|handleClickUpdate('${student.id}')|" class="fas fa-pen-alt"
                             style="color: blue; cursor: pointer;"></i>
-                        <i th:attr="onclick=|handleClick('${teacher.id}')|" class="fas fa-trash-alt"
+                        <i th:attr="onclick=|handleClick('${student.id}')|" class="fas fa-trash-alt"
                             style="color: red; cursor: pointer; padding-left: 15px;"></i>
                     </td>
                 </tr>
@@ -116,13 +107,13 @@
         </table>
 
         <div id="container2">
-            <i id="leftArrow" th:attr="onclick=|pageBackward('${allteachers.number}')|"
+            <i id="leftArrow" th:attr="onclick=|pageBackward('${allstudents.number}')|"
                 class="fas fa-solid fa-arrow-left fa-2x" style="position: absolute; right: 55px; cursor: pointer;"></i>
-            <i id="rightArrow" th:attr="onclick=|pageForward('${allteachers.number}')|"
+            <i id="rightArrow" th:attr="onclick=|pageForward('${allstudents.number}')|"
                 class="fas fa-solid fa-arrow-right fa-2x" style="position: absolute; right: 15px; cursor: pointer;"></i>
             <br>
             <br>
-            <small id="pageCount" style="position: absolute; right: 35px;" th:text="${allteachers.totalPages}"></small>
+            <small id="pageCount" style="position: absolute; right: 35px;" th:text="${allstudents.totalPages}"></small>
         </div>
 
         <style>
@@ -177,18 +168,6 @@
 
             const searchInput = document.getElementById("searchInput");
 
-            function toggleClassrooms(teacherName) {
-                let target = event.target || event.srcElement
-                target.style.display = "none"
-
-                const classroomsContainer = document.getElementById(teacherName)
-
-                if (classroomsContainer.style.display === "none") {
-                    classroomsContainer.style.display = "initial"
-
-                }
-            }
-
             function pageForward(pageId) {
                 let currentPage = Number(localStorage.getItem("page"))
 
@@ -198,7 +177,7 @@
 
                 let xhr = new XMLHttpRequest()
 
-                xhr.open("GET", `/admin/teachers?page=${currentPage + 1}`, false)
+                xhr.open("GET", `/admin/students?page=${currentPage + 1}`, false)
                 xhr.send(null);
                 let data = JSON.parse(xhr.response)
 
@@ -214,45 +193,17 @@
                     }
                 }
 
-                data.content.forEach((teacher) => {
+                data.content.forEach((student) => {
                     const newTr = document.createElement("tr")
                     const newTd1 = document.createElement("td")
                     const newTd2 = document.createElement("td")
                     const newTd3 = document.createElement("td")
                     const newTd4 = document.createElement("td")
 
-                    newTd4.setAttribute("id", `classrooms${teacher.id}`)
-
-                    const newButton = document.createElement("span")
-                    newButton.setAttribute("class", "btn btn-secondary dropdown-toggle")
-                    newButton.addEventListener("click", wrapEventCallback(toggleClassrooms, teacher.name))
-                    newButton.innerHTML = "See all classrooms"
-                    newTd4.appendChild(newButton)
-
-                    const newDiv = document.createElement("div")
-                    newDiv.setAttribute("id", teacher.name)
-                    newDiv.style.display = "none"
-                    newDiv.setAttribute("contenteditable", true)
-                    newDiv.addEventListener("click", wrapEventCallback(changeStyle, 0))
-                    newTd4.appendChild(newDiv)
-
-
-                    teacher.classrooms.forEach(classroom => {
-                        const newDiv2 = document.createElement("div")
-                        newDiv.appendChild(newDiv2)
-
-                        const newSpan = document.createElement("span")
-                        newSpan.innerHTML = classroom.name
-                        newSpan.setAttribute("spellcheck", false)
-                        newDiv2.appendChild(newSpan)
-                    })
-
-
-
                     container.appendChild(newTr);
                     newTr.appendChild(newTd2);
                     newTr.appendChild(newTd1);
-                    newTr.appendChild(newTd4)
+                    newTr.appendChild(newTd4);
                     newTr.appendChild(newTd3);
 
                     const newI2 = document.createElement("i")
@@ -260,7 +211,7 @@
                     newI2.setAttribute("class", "fas fa-pen-alt")
                     newI2.style.color = "blue";
                     newI2.style.cursor = "pointer";
-                    newI2.addEventListener("click", wrapEventCallback(handleClickUpdate, teacher.id));
+                    newI2.addEventListener("click", wrapEventCallback(handleClickUpdate, student.id));
 
                     const newI = document.createElement("i")
                     newTd3.appendChild(newI);
@@ -268,16 +219,24 @@
                     newI.style.color = "red";
                     newI.style.cursor = "pointer";
                     newI.style.paddingLeft = "15px"
-                    newI.addEventListener("click", wrapEventCallback(handleClick, teacher.id));
+                    newI.addEventListener("click", wrapEventCallback(handleClick, student.id));
 
                     newTd1.setAttribute("contenteditable", "true")
                     newTd1.setAttribute("spellcheck", "false")
-                    newTd1.setAttribute("id", `${teacher.id}`)
-                    newTd1.addEventListener("click", wrapEventCallback(changeStyle, teacher.id));
+                    newTd1.setAttribute("id", `${student.id}`)
 
-                    const nameInput = document.getElementById(`${teacher.id}`)
-                    newTd1.innerHTML = `${teacher.name}`
-                    newTd2.innerHTML = `${teacher.login}`
+                    
+                    newTd4.setAttribute("contenteditable", "true")
+                    newTd4.setAttribute("spellcheck", "false")
+                    newTd4.setAttribute("id", `classrooms${student.id}`)
+
+                    newTd1.addEventListener("click", wrapEventCallback(changeStyle, student.id));
+                    newTd4.addEventListener("click", wrapEventCallback(changeStyle, student.id));
+
+                    const nameInput = document.getElementById(`${student.id}`)
+                    newTd1.innerHTML = `${student.name}`
+                    newTd2.innerHTML = `${student.login}`
+                    newTd4.innerHTML = `${student.classroom.name}`
                 })
 
                 localStorage.removeItem("page")
@@ -296,7 +255,7 @@
             }
 
             function pageBackward(pageId) {
-                let currentPage = localStorage.getItem("page")
+                let currentPage = Number(localStorage.getItem("page"))
 
                 if (currentPage - 1 < 0) {
                     return
@@ -304,7 +263,7 @@
 
                 let xhr = new XMLHttpRequest()
 
-                xhr.open("GET", `/admin/teachers?page=${currentPage - 1}`, false)
+                xhr.open("GET", `/admin/students?page=${currentPage - 1}`, false)
                 xhr.send(null);
                 let data = JSON.parse(xhr.response)
 
@@ -320,14 +279,17 @@
                     }
                 }
 
-                data.content.forEach((teacher) => {
+                data.content.forEach((student) => {
                     const newTr = document.createElement("tr")
                     const newTd1 = document.createElement("td")
                     const newTd2 = document.createElement("td")
                     const newTd3 = document.createElement("td")
+                    const newTd4 = document.createElement("td")
+
                     container.appendChild(newTr);
-                    newTr.appendChild(newTd1);
                     newTr.appendChild(newTd2);
+                    newTr.appendChild(newTd1);
+                    newTr.appendChild(newTd4);
                     newTr.appendChild(newTd3);
 
                     const newI2 = document.createElement("i")
@@ -335,7 +297,7 @@
                     newI2.setAttribute("class", "fas fa-pen-alt")
                     newI2.style.color = "blue";
                     newI2.style.cursor = "pointer";
-                    newI2.addEventListener("click", wrapEventCallback(handleClickUpdate, teacher.id));
+                    newI2.addEventListener("click", wrapEventCallback(handleClickUpdate, student.id));
 
                     const newI = document.createElement("i")
                     newTd3.appendChild(newI);
@@ -343,16 +305,24 @@
                     newI.style.color = "red";
                     newI.style.cursor = "pointer";
                     newI.style.paddingLeft = "15px"
-                    newI.addEventListener("click", wrapEventCallback(handleClick, teacher.id));
+                    newI.addEventListener("click", wrapEventCallback(handleClick, student.id));
 
                     newTd1.setAttribute("contenteditable", "true")
                     newTd1.setAttribute("spellcheck", "false")
-                    newTd1.setAttribute("id", `${teacher.id}`)
-                    newTd1.addEventListener("click", wrapEventCallback(changeStyle, teacher.id));
+                    newTd1.setAttribute("id", `${student.id}`)
 
-                    const nameInput = document.getElementById(`${teacher.id}`)
-                    newTd1.innerHTML = `${teacher.name}`
-                    newTd2.innerHTML = `${teacher.login}`
+                    
+                    newTd4.setAttribute("contenteditable", "true")
+                    newTd4.setAttribute("spellcheck", "false")
+                    newTd4.setAttribute("id", `classrooms${student.id}`)
+
+                    newTd1.addEventListener("click", wrapEventCallback(changeStyle, student.id));
+                    newTd4.addEventListener("click", wrapEventCallback(changeStyle, student.id));
+
+                    const nameInput = document.getElementById(`${student.id}`)
+                    newTd1.innerHTML = `${student.name}`
+                    newTd2.innerHTML = `${student.login}`
+                    newTd4.innerHTML = `${student.classroom.name}`
                 })
 
                 localStorage.removeItem("page")
@@ -360,62 +330,60 @@
                 let numberVersion = Number(localStorage.getItem("page"))
                 pageCount.innerHTML = `${numberVersion + 1} / ${TOTAL_PAGES}`
 
+
                 const rightArrow = document.getElementById("rightArrow")
-                rightArrow.removeEventListener("click", wrapEventCallback(pageForward))
+                rightArrow.removeEventListener("click", pageForward)
                 //rightArrow.addEventListener("click", wrapEventCallback(pageForward, currentPage))
 
                 const leftArrow = document.getElementById("leftArrow")
-                leftArrow.removeEventListener("click", wrapEventCallback(pageBackward))
+                leftArrow.removeEventListener("click", pageBackward)
                 //leftArrow.addEventListener("click", wrapEventCallback(pageBackward, currentPage))
             }
 
-            function changeStyle(teacherId) {
+            function changeStyle(studentId) {
                 let nameInput = event.target || event.srcElement
 
-                //const nameInput = document.getElementById(`${teacherId}`)
+                //const nameInput = document.getElementById(`${studentId}`)
                 nameInput.style.fontStyle = "italic"
                 nameInput.style.fontWeight = "bold"
             }
 
-            function handleClickUpdate(teacherId) {
+            function handleClickUpdate(studentId) {
 
                 const container = document.getElementById("containerMessages")
                 while (container.firstChild) {
                     container.removeChild(container.lastChild);
                 }
 
-                const nameInput = document.getElementById(`${teacherId}`)
+                const nameInput = document.getElementById(`${studentId}`)
 
                 const CSRF_TOKEN = document.head.querySelector("meta[name=_csrf]").content
                 const CSRF_HEADER = document.head.querySelector("meta[name=_csrf_header]").content
 
-                const classroomsDad = document.getElementById(`classrooms${teacherId}`)
-                const classroomsContainer = classroomsDad.querySelector('div')
-
-                const classrooms = []
-
-                let children = classroomsContainer.children;
-
-                if (children.length !== 1) {
-                    for (let i = 0; i < children.length; i++) {
-                        let tableChild = children[i];
-                        let classroomName = tableChild.querySelector('span').textContent
-                        classrooms.push({
-                            name: classroomName
-                        })
-                    }
-                }
-
                 let xhr = new XMLHttpRequest()
 
-                xhr.open("PUT", `/admin/teachers/${teacherId}`, true)
+                const classroom = document.getElementById(`classrooms${studentId}`)
+
+
+                xhr.open("PUT", `/admin/students/${studentId}`, true)
                 xhr.setRequestHeader('Content-Type', 'application/json')
                 xhr.setRequestHeader(CSRF_HEADER, CSRF_TOKEN)
 
-                xhr.send(JSON.stringify({
+                if(classroom.textContent !== ""){
+                    xhr.send(JSON.stringify({
                     name: nameInput.textContent,
-                    classrooms: classrooms
-                }));
+                    classroom: {
+                        name: classroom.textContent
+                    } 
+                    }));
+                }else{
+                    xhr.send(JSON.stringify({
+                    name: nameInput.textContent,
+                    classroom: {
+                        name: null
+                    } 
+                    }));
+                }
 
                 xhr.onload = function () {
                     let data = JSON.parse(this.response);
@@ -430,7 +398,7 @@
                                 errorDiv.innerHTML += `${field.name} ${field.message} <br>`
                             })
                         } else {
-                            errorDiv.innerHTML += "Teacher name must be unique"
+                            errorDiv.innerHTML += "student name must be unique"
 
                             //classroom not found
                         }
@@ -438,21 +406,14 @@
                         nameInput.style.fontStyle = "normal"
                         nameInput.style.fontWeight = "normal"
 
-                        let children = classroomsContainer.children;
+                        classroom.style.fontSize = "normal"
+                        classroom.style.fontWeight = "normal"
 
-                        if (children.length !== 1) {
-                            for (let i = 0; i < children.length; i++) {
-                                let tableChild = children[i];
-                                let classroomName = tableChild.querySelector('span')
-                                classroomName.style.fontStyle = "normal"
-                                classroomName.style.fontWeight = "normal"
-                            }
-                        }
 
                         const successDiv = document.createElement("div")
                         container.appendChild(successDiv);
                         successDiv.setAttribute("class", "alert alert-success")
-                        successDiv.innerHTML = "Teacher Updated"
+                        successDiv.innerHTML = "Student Updated"
 
                         setTimeout(() => {
                             successDiv.parentNode.removeChild(successDiv)
@@ -461,21 +422,21 @@
                 }
             }
 
-            function handleClick(teacherId) {
+            function handleClick(studentId) {
                 const CSRF_TOKEN = document.head.querySelector("meta[name=_csrf]").content
                 const CSRF_HEADER = document.head.querySelector("meta[name=_csrf_header]").content
 
                 let xhr = new XMLHttpRequest()
 
-                xhr.open("DELETE", `/admin/teachers/${teacherId}`, false)
+                xhr.open("DELETE", `/admin/students/${studentId}`, false)
                 xhr.setRequestHeader(CSRF_HEADER, CSRF_TOKEN)
                 xhr.send(null);
 
                 if (xhr.status !== 204) {
-                    window.location.href = "/admin/get-teachers?error"
+                    window.location.href = "/admin/get-students?error"
                 }
 
-                window.location.href = "/admin/get-teachers?success"
+                window.location.href = "/admin/get-students?success"
             }
 
             function handleOnInput() {
@@ -485,7 +446,7 @@
 
                     let xhr = new XMLHttpRequest()
 
-                    xhr.open("GET", `/admin/teacher/${searchInput.value}`, false)
+                    xhr.open("GET", `/admin/student/${searchInput.value}`, false)
                     xhr.send(null);
                     let data = JSON.parse(xhr.response)
 
@@ -501,38 +462,16 @@
                         }
                     }
 
-                    data.forEach((teacher) => {
+                    data.forEach((student) => {
                         const newTr = document.createElement("tr")
                         const newTd1 = document.createElement("td")
                         const newTd2 = document.createElement("td")
                         const newTd3 = document.createElement("td")
                         const newTd4 = document.createElement("td")
 
-                        newTd4.setAttribute("id", `classrooms${teacher.id}`)
-
-                        const newButton = document.createElement("span")
-                        newButton.setAttribute("class", "btn btn-secondary dropdown-toggle")
-                        newButton.addEventListener("click", wrapEventCallback(toggleClassrooms, teacher.name))
-                        newButton.innerHTML = "See all classrooms"
-                        newTd4.appendChild(newButton)
-
-                        const newDiv = document.createElement("div")
-                        newDiv.setAttribute("id", teacher.name)
-                        newDiv.style.display = "none"
-                        newDiv.setAttribute("contenteditable", true)
-                        newDiv.addEventListener("click", wrapEventCallback(changeStyle, 0))
-                        newTd4.appendChild(newDiv)
-
-
-                        teacher.classrooms.forEach(classroom => {
-                            const newDiv2 = document.createElement("div")
-                            newDiv.appendChild(newDiv2)
-
-                            const newSpan = document.createElement("span")
-                            newSpan.innerHTML = classroom.name
-                            newSpan.setAttribute("spellcheck", false)
-                            newDiv2.appendChild(newSpan)
-                        })
+                        newTd4.setAttribute("contenteditable", "true")
+                        newTd4.setAttribute("spellcheck", "false")
+                        newTd4.setAttribute("id", `classrooms${student.id}`)
 
                         container.appendChild(newTr);
                         newTr.appendChild(newTd1);
@@ -545,7 +484,7 @@
                         newI2.setAttribute("class", "fas fa-pen-alt")
                         newI2.style.color = "blue";
                         newI2.style.cursor = "pointer";
-                        newI2.addEventListener("click", wrapEventCallback(handleClickUpdate, teacher.id));
+                        newI2.addEventListener("click", wrapEventCallback(handleClickUpdate, student.id));
 
                         const newI = document.createElement("i")
                         newTd3.appendChild(newI);
@@ -553,16 +492,18 @@
                         newI.style.color = "red";
                         newI.style.cursor = "pointer";
                         newI.style.paddingLeft = "15px"
-                        newI.addEventListener("click", wrapEventCallback(handleClick, teacher.id));
+                        newI.addEventListener("click", wrapEventCallback(handleClick, student.id));
 
                         newTd1.setAttribute("contenteditable", "true")
                         newTd1.setAttribute("spellcheck", "false")
-                        newTd1.setAttribute("id", `${teacher.id}`)
-                        newTd1.addEventListener("click", wrapEventCallback(changeStyle, teacher.id));
+                        newTd1.setAttribute("id", `${student.id}`)
+                        newTd1.addEventListener("click", wrapEventCallback(changeStyle, student.id));
+                        newTd4.addEventListener("click", wrapEventCallback(changeStyle, student.id));
 
-                        const nameInput = document.getElementById(`${teacher.id}`)
-                        newTd1.innerHTML = `${teacher.name}`
-                        newTd2.innerHTML = `${teacher.login}`
+                        const nameInput = document.getElementById(`${student.id}`)
+                        newTd1.innerHTML = `${student.name}`
+                        newTd2.innerHTML = `${student.login}`
+                        newTd4.innerHTML = `${student.classroom.name}`
                     })
                 } else {
                     container2.style.display = "inherit"
@@ -572,7 +513,7 @@
 
                     let xhr = new XMLHttpRequest()
 
-                    xhr.open("GET", `/admin/teachers`, false)
+                    xhr.open("GET", `/admin/students`, false)
                     xhr.send(null);
                     let data = JSON.parse(xhr.response)
 
@@ -588,22 +529,29 @@
                         }
                     }
 
-                    data.content.forEach((teacher) => {
+                    data.content.forEach((student) => {
                         const newTr = document.createElement("tr")
                         const newTd1 = document.createElement("td")
                         const newTd2 = document.createElement("td")
                         const newTd3 = document.createElement("td")
+                        const newTd4 = document.createElement("td")
+
                         container.appendChild(newTr);
                         newTr.appendChild(newTd1);
                         newTr.appendChild(newTd2);
+                        newTr.appendChild(newTd4);
                         newTr.appendChild(newTd3);
+
+                        newTd4.setAttribute("contenteditable", "true")
+                        newTd4.setAttribute("spellcheck", "false")
+                        newTd4.setAttribute("id", `classrooms${student.id}`)
 
                         const newI2 = document.createElement("i")
                         newTd3.appendChild(newI2);
                         newI2.setAttribute("class", "fas fa-pen-alt")
                         newI2.style.color = "blue";
                         newI2.style.cursor = "pointer";
-                        newI2.addEventListener("click", wrapEventCallback(handleClickUpdate, teacher.id));
+                        newI2.addEventListener("click", wrapEventCallback(handleClickUpdate, student.id));
 
                         const newI = document.createElement("i")
                         newTd3.appendChild(newI);
@@ -611,16 +559,18 @@
                         newI.style.color = "red";
                         newI.style.cursor = "pointer";
                         newI.style.paddingLeft = "15px"
-                        newI.addEventListener("click", wrapEventCallback(handleClick, teacher.id));
+                        newI.addEventListener("click", wrapEventCallback(handleClick, student.id));
 
                         newTd1.setAttribute("contenteditable", "true")
                         newTd1.setAttribute("spellcheck", "false")
-                        newTd1.setAttribute("id", `${teacher.id}`)
-                        newTd1.addEventListener("click", wrapEventCallback(changeStyle, teacher.id));
+                        newTd1.setAttribute("id", `${student.id}`)
+                        newTd1.addEventListener("click", wrapEventCallback(changeStyle, student.id));
+                        newTd4.addEventListener("click", wrapEventCallback(changeStyle, student.id));
 
-                        const nameInput = document.getElementById(`${teacher.id}`)
-                        newTd1.innerHTML = `${teacher.name}`
-                        newTd2.innerHTML = `${teacher.login}`
+                        const nameInput = document.getElementById(`${student.id}`)
+                        newTd1.innerHTML = `${student.name}`
+                        newTd2.innerHTML = `${student.login}`
+                        newTd4.innerHTML = `${student.classroom.name}`
                     })
                 }
             }

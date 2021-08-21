@@ -121,14 +121,19 @@ public class StudentService {
             student.setLogin(studentFound.getLogin());
             student.setPassword(studentFound.getPassword());
     
-            Optional<Classroom> classroomFound = classroomRepository.findByName(student.getClassroom().getName());
-
-            if(classroomFound.isEmpty()){
-                throw new GeneralException("Classroom not found");
+            if(student.getClassroom().getName() != null){
+                Optional<Classroom> classroomFound = classroomRepository.findByName(student.getClassroom().getName());
+    
+                if(classroomFound.isEmpty()){
+                    throw new GeneralException("Classroom not found");
+                }
+    
+                student.getClassroom().setName(classroomFound.get().getName());
+                student.getClassroom().setId(classroomFound.get().getId());
+            }else{
+                student.setClassroom(null);
             }
 
-            student.getClassroom().setName(classroomFound.get().getName());
-            student.getClassroom().setId(classroomFound.get().getId());
     
             return studentRepository.save(student);
         }else{

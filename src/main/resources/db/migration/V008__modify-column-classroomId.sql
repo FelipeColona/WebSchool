@@ -1,0 +1,1 @@
+ALTER TABLE student MODIFY COLUMN classroom_id BIGINT;

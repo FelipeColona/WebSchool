@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
@@ -40,6 +41,8 @@ public class Classroom {
     @NotNull
     private List<Teacher> teachers;
 
-    @OneToMany(mappedBy = "classroom")
+    @OneToMany()
+    //mappedBy=classroom
+    @JoinColumn(name="classroom_id")
     private List<Student> students;
 }

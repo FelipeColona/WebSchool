@@ -21,8 +21,10 @@ public class StudentAssembler {
     private ModelMapper modelMapper;
 
     public StudentModel toModel(Student student){
-        student.getClassroom().setTeachers(null);
-        student.getClassroom().setStudents(null);
+        if(student.getClassroom() != null){
+            student.getClassroom().setTeachers(null);
+            student.getClassroom().setStudents(null);
+        }
         
         StudentModel res = modelMapper.map(student, StudentModel.class);
 
@@ -31,9 +33,11 @@ public class StudentAssembler {
 
     public List<StudentModel> toCollectionModel(List<Student> students){
 
-        students.forEach(student -> {
-            student.getClassroom().setStudents(null);
-            student.getClassroom().setTeachers(null);
+        students.forEach( student -> {
+            if(student.getClassroom() != null){
+                student.getClassroom().setTeachers(null);
+                student.getClassroom().setStudents(null);
+            }
         });
 
         List<StudentModel> res = students.stream()
@@ -81,8 +85,10 @@ public class StudentAssembler {
 
     public ImprovedStudentPage<StudentModel> toPageModel(Page<Student> students){
         students.getContent().forEach( student -> {
-            student.getClassroom().setStudents(null);
-            student.getClassroom().setTeachers(null);
+            if(student.getClassroom() != null){
+                student.getClassroom().setTeachers(null);
+                student.getClassroom().setStudents(null);
+            }
         });
 
         Page<Student> studentsCopy = students;
