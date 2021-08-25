@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.webschool.api.assembler.TeacherAssembler;
+import br.com.webschool.api.exceptionhandler.ErrorDetails.Field;
+import br.com.webschool.api.exceptionhandler.NotUniqueException;
+import br.com.webschool.api.exceptionhandler.ResourceNotFoundException;
 import br.com.webschool.api.model.input.TeacherInput;
-import br.com.webschool.domain.exception.GeneralException;
 import br.com.webschool.domain.model.Classroom;
 import br.com.webschool.domain.model.Teacher;
 import br.com.webschool.domain.repository.ClassroomRepository;
@@ -37,8 +39,11 @@ public class TeacherService {
 
 
     public Teacher search(Long teacherId){
+        List<Field> fields = new ArrayList<>();
+        fields.add(new Field("name", "Teacher not found"));
+
         return teacherRepository.findById(teacherId)
-        .orElseThrow(() -> new GeneralException("Teacher not found"));
+        .orElseThrow(() -> new ResourceNotFoundException(fields));
     }
 
     @Transactional
@@ -48,7 +53,9 @@ public class TeacherService {
             Optional<Classroom> existingClassroom = classroomRepository.findByName(classroom.getName());
 
             if(existingClassroom.isEmpty()){
-                throw new GeneralException("Class not found");
+                List<Field> fields = new ArrayList<>();
+                fields.add(new Field("classroom", "Classroom not found"));
+                throw new ResourceNotFoundException(fields);
             }
 
             classroom.setId(existingClassroom.get().getId());
@@ -137,7 +144,9 @@ public class TeacherService {
                     Optional<Classroom> classroomFound = classroomRepository.findByName(classroom.getName());
     
                     if(classroomFound.isEmpty()){
-                        throw new GeneralException("Classroom not found");
+                        List<Field> fields = new ArrayList<>();
+                        fields.add(new Field("classroom", "Classroom not found"));
+                        throw new ResourceNotFoundException(fields);
                     }
     
                     classroom.setId(classroomFound.get().getId());
@@ -146,7 +155,9 @@ public class TeacherService {
     
             return teacherRepository.save(teacher);
         }else{
-            throw new GeneralException("Teacher name must be unique");
+            List<Field> fields = new ArrayList<>();
+            fields.add(new Field("name", "Teacher name must be unique"));
+            throw new NotUniqueException(fields);
         }
     }
 

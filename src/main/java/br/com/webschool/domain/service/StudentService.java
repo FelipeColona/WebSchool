@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.webschool.api.assembler.StudentAssembler;
+import br.com.webschool.api.exceptionhandler.ErrorDetails.Field;
+import br.com.webschool.api.exceptionhandler.NotUniqueException;
+import br.com.webschool.api.exceptionhandler.ResourceNotFoundException;
 import br.com.webschool.api.model.input.StudentInput;
-import br.com.webschool.domain.exception.GeneralException;
 import br.com.webschool.domain.model.Classroom;
 import br.com.webschool.domain.model.Student;
 import br.com.webschool.domain.repository.ClassroomRepository;
@@ -32,7 +34,9 @@ public class StudentService {
         Optional<Classroom> existingClassroom = classroomRepository.findByName(studentInput.getClassroom().getName());
 
         if(existingClassroom.isEmpty()){
-            throw new GeneralException("Class not found");
+            List<Field> fields = new ArrayList<>();
+            fields.add(new Field("classroom", "Classroom not found"));
+            throw new ResourceNotFoundException(fields);
         }
 
         studentInput.getClassroom().setId(existingClassroom.get().getId());
@@ -125,7 +129,9 @@ public class StudentService {
                 Optional<Classroom> classroomFound = classroomRepository.findByName(student.getClassroom().getName());
     
                 if(classroomFound.isEmpty()){
-                    throw new GeneralException("Classroom not found");
+                    List<Field> fields = new ArrayList<>();
+                    fields.add(new Field("classroom", "Classroom not found"));
+                    throw new ResourceNotFoundException(fields);
                 }
     
                 student.getClassroom().setName(classroomFound.get().getName());
@@ -137,7 +143,9 @@ public class StudentService {
     
             return studentRepository.save(student);
         }else{
-            throw new GeneralException("Student name must be unique");
+            List<Field> fields = new ArrayList<>();
+            fields.add(new Field("name", "Student name must be unique"));
+            throw new NotUniqueException(fields);
         }
     }
 

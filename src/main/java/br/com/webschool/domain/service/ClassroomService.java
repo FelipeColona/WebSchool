@@ -1,5 +1,6 @@
 package br.com.webschool.domain.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,8 +9,9 @@ import javax.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import br.com.webschool.api.assembler.ClassroomAssembler;
+import br.com.webschool.api.exceptionhandler.ErrorDetails.Field;
+import br.com.webschool.api.exceptionhandler.NotUniqueException;
 import br.com.webschool.api.model.input.ClassroomInput;
-import br.com.webschool.domain.exception.GeneralException;
 import br.com.webschool.domain.model.Classroom;
 import br.com.webschool.domain.model.Student;
 import br.com.webschool.domain.model.Teacher;
@@ -102,7 +104,9 @@ public class ClassroomService {
             return classroomRepository.save(classroom);
 
         }else{
-            throw new GeneralException("Class name must be unique");
+            List<Field> fields = new ArrayList<>();
+            fields.add(new Field("name", "Classroom name must be unique"));
+            throw new NotUniqueException(fields);
         }
     }
 }

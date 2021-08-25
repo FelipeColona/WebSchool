@@ -13,7 +13,7 @@ import lombok.Setter;
 @JsonInclude(Include.NON_NULL)
 @Getter
 @Setter
-public class Problem {
+public class ErrorDetails {
     private Integer status;
     private OffsetDateTime dateTime;
     private String title;

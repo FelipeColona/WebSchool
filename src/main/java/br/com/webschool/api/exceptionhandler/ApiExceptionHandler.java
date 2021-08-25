@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -27,21 +28,45 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatus status, WebRequest request) {
         
-        List<Problem.Field> fields = new ArrayList<>();
+        List<ErrorDetails.Field> fields = new ArrayList<>();
 
-        Problem problem = new Problem();
-        problem.setStatus(status.value());
-        problem.setDateTime(OffsetDateTime.now());
-        problem.setTitle("There are one or more invalid fields. Please fill it in the correct way and try again.");
-        problem.setFields(fields);
+        ErrorDetails errorDetails = new ErrorDetails();
+        errorDetails.setStatus(status.value());
+        errorDetails.setDateTime(OffsetDateTime.now());
+        errorDetails.setTitle("There are one or more invalid fields. Please fill it in the correct way and try again.");
+        errorDetails.setFields(fields);
                 
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String nome = ((FieldError) error).getField();
             String mensagem = messageSource.getMessage(error, LocaleContextHolder.getLocale());
 
-            fields.add(new Problem.Field(nome, mensagem));
+            fields.add(new ErrorDetails.Field(nome, mensagem));
         });
 
-        return handleExceptionInternal(ex, problem, headers, status, request);
+        return handleExceptionInternal(ex, errorDetails, headers, status, request);
     }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<?> resourceNotFoundHandling(ResourceNotFoundException exception, WebRequest request){
+        List<ErrorDetails.Field> fields = exception.getFields();
+        ErrorDetails errorDetails = new ErrorDetails();
+        errorDetails.setStatus(404);
+        errorDetails.setDateTime(OffsetDateTime.now());
+        errorDetails.setTitle("There are one or more invalid fields. Please fill it in the correct way and try again.");
+        errorDetails.setFields(fields);
+
+		return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+	}
+
+    @ExceptionHandler(NotUniqueException.class)
+	public ResponseEntity<?> notUniqueException(NotUniqueException exception, WebRequest request){
+        List<ErrorDetails.Field> fields = exception.getFields();
+        ErrorDetails errorDetails = new ErrorDetails();
+        errorDetails.setStatus(404);
+        errorDetails.setDateTime(OffsetDateTime.now());
+        errorDetails.setTitle("There are one or more invalid fields. Please fill it in the correct way and try again.");
+        errorDetails.setFields(fields);
+
+		return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+	}
 }
