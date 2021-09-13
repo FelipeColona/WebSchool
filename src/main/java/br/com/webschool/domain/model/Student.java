@@ -1,6 +1,7 @@
 package br.com.webschool.domain.model;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
@@ -43,6 +45,9 @@ public class Student implements UserDetails {
     @ManyToOne()
     @JoinColumn(name="classroom_id")
     private Classroom classroom;
+
+    @OneToMany(mappedBy = "student")
+    private List<Evaluation> evaluations;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
