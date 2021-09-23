@@ -15,8 +15,312 @@
         crossorigin="anonymous"></script>
 </head>
 
-<body>
-    <h1>Home</h1>
+<body onload="averageGrades()">
+    <div class="flex-container">
+        <aside class="menuContainer">
+            <h3>Menu</h3>
+            <ul>
+                <li style="cursor: pointer; color: black; background-color: #f0f0f0;" onclick="toggleAverageGrades()">
+                    Averages</li>
+                <li style="cursor: pointer; color: black; background-color: #f0f0f0;"
+                    onclick="toggleEvaluations()">
+                    Evaluations</li>
+            </ul>
+        </aside>
+        <div id="main">
+            <div id="studentInfo">
+                <span th:text="|Name: ${currentStudent.name}|"></span>
+                <br>
+                <span th:text="|Classroom: ${currentStudent.classroom.name}"></span>
+            </div>
+
+            <div id="trimestersContainer">
+                <button class="btn btn-primary" style="display: none;" id="current" onclick="toggleTrimester(1)">First Trimester</button>
+                <button class="btn btn-secondary" style="display: none;" onclick="toggleTrimester(2)">Second Trimester</button>
+                <button class="btn btn-secondary" style="display: none;" onclick="toggleTrimester(3)">Third Trimester</button>
+            </div>
+            <table id="reportCard" class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Average</th>
+                        <th scope="col" style="padding-left: 50px;">Trimestral Average</th>
+                    </tr>
+                </thead>
+                <tbody id="subjectsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const evaluations = [[${ currentStudent.evaluations }]];
+        /*]]>*/
+
+        let currentEvaluations = evaluations.filter( evaluation => evaluation.trimester === 1)
+
+        function averageGrades() {
+
+            let subjects = []
+            evaluations.forEach(evaluation => {
+                subjects.push(evaluation.subject)
+            })
+            subjects = subjects.filter((x, i, a) => a.indexOf(x) == i)
+
+            const subjectsBody = document.getElementById("subjectsBody")
+            subjects.forEach(subject => {
+                const newTr = document.createElement("tr")
+                subjectsBody.append(newTr)
+
+                const newTh = document.createElement("th")
+                newTh.textContent = subject
+                newTr.append(newTh)
+
+                let currentSubject = evaluations.filter(evaluation => {
+                    return evaluation.subject === subject
+                })
+
+                let sumOfGrades = 0
+                currentSubject.forEach(evaluationsub => {
+                    sumOfGrades += evaluationsub.grade
+                })
+                let averageGradesSubject = (sumOfGrades / currentSubject.length).toFixed(1)
+
+                const newTd1 = document.createElement("td")
+                newTd1.textContent = `${averageGradesSubject}`
+                newTr.append(newTd1)
+
+                const newTd2 = document.createElement("td")
+                newTd2.style.paddingLeft = "100px"
+                newTd2.textContent = `${averageGradesSubject}`
+                newTr.append(newTd2)
+            })
+        }
+
+        function toggleAverageGrades() {
+            const reportCard = document.getElementById("reportCard")
+            while (reportCard.firstChild) {
+                reportCard.firstChild.remove()
+            }
+
+            const trimestersContainer = document.getElementById("trimestersContainer")
+            Array.from(trimestersContainer.children).forEach( button => {
+                button.style.display = "none"
+            })
+
+            const newThead = document.createElement("thead")
+
+            const newTr = document.createElement("tr")
+
+            const newTh1 = document.createElement("th")
+            newTh1.scope = "col"
+            newTh1.textContent = "#"
+
+            const newTh2 = document.createElement("th")
+            newTh2.scope = "col"
+            newTh2.textContent = "Average"
+
+            const newTh3 = document.createElement("th")
+            newTh3.scope = "col"
+            newTh3.style.paddingLeft = "50px"
+            newTh3.textContent = "Trimestral Average"
+
+            newThead.append(newTr)
+            newTr.append(newTh1)
+            newTr.append(newTh2)
+            newTr.append(newTh3)
+
+            reportCard.append(newThead)
+
+            const newTbody = document.createElement("tbody")
+            newTbody.setAttribute("id", "subjectsBody")
+            reportCard.append(newTbody)
+
+            averageGrades()
+        }
+
+        function toggleEvaluations() {
+            const reportCard = document.getElementById("reportCard")
+            while (reportCard.firstChild) {
+                reportCard.firstChild.remove()
+            }
+
+            const trimestersContainer = document.getElementById("trimestersContainer")
+            Array.from(trimestersContainer.children).forEach( button => {
+                button.style.display = "initial"
+            })
+
+            let types = []
+            currentEvaluations.forEach(evaluation => {
+                types.push(evaluation.type)
+            })
+            types = types.filter((x, i, a) => a.indexOf(x) == i)
+
+            const newThead = document.createElement("thead")
+
+            const newTr = document.createElement("tr")
+            newTr.setAttribute("id", "trHead")
+            newThead.append(newTr)
+
+            const newTh1 = document.createElement("th")
+            newTh1.scope = "col"
+            newTh1.textContent = "#"
+            newTr.append(newTh1)
+
+            types.forEach(type => {
+                const newTh2 = document.createElement("th")
+                newTh2.scope = "col"
+                newTh2.textContent = type
+                newTr.append(newTh2)
+            })
+            reportCard.append(newThead)
+
+            const newTbody = document.createElement("tbody")
+
+            let subjects = []
+            currentEvaluations.forEach(evaluation => {
+                subjects.push(evaluation.subject)
+            })
+            subjects = subjects.filter((x, i, a) => a.indexOf(x) == i)
+
+            for (let i = 0; i < subjects.length; i++) {
+                const newTr2 = document.createElement("tr")
+                newTbody.append(newTr2)
+
+                const newTh3 = document.createElement("th")
+                newTh3.textContent = subjects[i]
+                newTr2.append(newTh3)
+
+                const trHead = document.getElementById("trHead")
+
+                let j = 0
+                let children = Array.from(trHead.children)
+                let currentEvaluation = []
+
+                children.forEach(child => {
+                    if (j === 0) {
+
+                    } else {
+                        currentEvaluation = currentEvaluations.filter(evaluation => {
+                            return evaluation.type === child.textContent && evaluation.subject === subjects[i]
+                        })
+                    }
+                    if (currentEvaluation.length) {
+                        if (j !== 1 && children.indexOf(child) !== Array.from(newTr2.children).length) {
+
+                            for (let l = 0; l < children.indexOf(child) - 1; l++) {
+                                const newTd = document.createElement("td")
+                                newTd.textContent = "#"
+                                newTr2.append(newTd)
+                            }
+
+                            const newTd2 = document.createElement("td")
+                            newTd2.textContent = `${currentEvaluation[0].grade}`
+                            newTr2.append(newTd2)
+                        } else {
+                            const newTd = document.createElement("td")
+                            newTd.textContent = `${currentEvaluation[0].grade}`
+                            newTr2.append(newTd)
+                        }
+
+                    }
+
+                    j++
+                })
+            }
+
+
+            reportCard.append(newTbody)
+        }
+
+        function toggleTrimester(trimester){
+            let buttonToBeCurrent = event.target || event.srcElement
+
+            //Request
+            /* 
+            currentEvaluations = response
+            toggleEvaluations()
+            */
+            currentEvaluations = evaluations.filter( evaluation => evaluation.trimester === trimester)
+
+            const currentButton = document.getElementById("current")
+            currentButton.removeAttribute("class")
+            currentButton.setAttribute("class", "btn btn-secondary")
+            currentButton.removeAttribute("id")
+
+            buttonToBeCurrent.removeAttribute("class")
+            buttonToBeCurrent.setAttribute("class", "btn btn-primary")
+            buttonToBeCurrent.setAttribute("id", "current")
+
+            toggleEvaluations()
+        }
+    </script>
 </body>
+
+<style>
+    .flex-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: normal;
+        align-items: normal;
+        align-content: normal;
+    }
+
+    .menuContainer {
+        display: flex;
+        flex-direction: column;
+        background-color: #f0f0f0;
+        padding: 5%;
+        border: 1px solid black;
+    }
+
+    #menu {
+        display: block;
+        flex-grow: 0;
+        flex-shrink: 1;
+        flex-basis: auto;
+        align-self: auto;
+        order: 0;
+        width: 20%;
+        height: 100%;
+        background-color: #f0f0f0;
+    }
+
+    #main {
+        display: flex;
+        flex-direction: column;
+        flex: 1 0 auto;
+        align-self: auto;
+        order: 0;
+    }
+
+    #studentInfo {
+        display: block;
+        flex: 1 0 20%;
+        align-self: auto;
+        order: 0;
+        padding: 25px;
+        background-color: #d8d8d8;
+        color: #000066;
+        font-weight: bold;
+        border-top: 1px solid black;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+    }
+
+    #current{
+        cursor: default;
+    }
+
+    #reportCard {
+        display: block;
+        flex: 1 0 auto;
+        align-self: auto;
+        order: 0;
+        padding: 25px;
+    }
+</style>
 
 </html>

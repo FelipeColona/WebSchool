@@ -1,5 +1,6 @@
 package br.com.webschool.domain.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,4 +29,19 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Long> {
         nativeQuery = true
     )
     Optional<Evaluation> findByTypeTrimesterAndSubject(String type, String subject, Long trimester);
+
+    @Query(
+        value = "SELECT * FROM evaluation " + 
+        "WHERE evaluation.student_id = ?1",
+        nativeQuery = true
+    )
+    List<Evaluation> findByStudentId(Long id);
+
+    @Query(
+        value = "SELECT * FROM evaluation " + 
+        "WHERE evaluation.student_id = ?1 AND " +
+        "evaluation.trimester = ?2",
+        nativeQuery = true
+    )
+    List<Evaluation> findByStudentIdAndTrimester(Long id, Long trimester);
 }
