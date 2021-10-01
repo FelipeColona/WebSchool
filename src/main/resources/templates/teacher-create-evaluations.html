@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:tiles="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta th:name="_csrf" th:content="${_csrf.token}" />
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="container"></div>
+
+    <br>
+
+    <form action="#" id="form" method="post">
+        Grade: <input type="number" id="grade">
+        Trimester: <input type="text" id="trimester">
+        Type: <input type="text" id="type">
+        Subject: <input type="text" id="subject">
+        <button type="submit" id="sub">Create</button>
+    </form>
+
+    <br>
+
+    <div id="evaluationsContainer">
+        <div th:each="evaluation: ${student.evaluations}">
+            <span th:text="${evaluation.type}"></span>
+            <span th:text="${evaluation.subject}"></span>
+            <span th:text="${evaluation.grade}"></span>
+        </div>
+    </div>
+
+
+    <script>
+        const evaluationsContainer = document.getElementById("evaluationsContainer") 
+
+        document.getElementById("form").addEventListener("submit", event => {
+            event.preventDefault()
+
+            const CSRF_TOKEN = document.head.querySelector("meta[name=_csrf]").content
+            const CSRF_HEADER = document.head.querySelector("meta[name=_csrf_header]").content
+
+            let haystack = window.location.href
+            let needle = "/"
+            let pos = 0;
+            let result = [];
+            let hayStackLower = haystack.toLowerCase();
+
+            while (hayStackLower.indexOf(needle, pos) != -1) {
+                result.push(hayStackLower.indexOf(needle, pos));
+                pos = hayStackLower.indexOf(needle, pos) + 1;
+            }
+
+
+            var xhr = new XMLHttpRequest()
+            xhr.open("POST", `${window.location.href.substr(0, result[2])}/teachers/evaluations`, true)
+            xhr.setRequestHeader('Content-Type', 'application/json')
+            xhr.setRequestHeader(CSRF_HEADER, CSRF_TOKEN)
+            const searchRegExp = /_/g;
+            const replaceWith = ' ';
+
+            let dataToBeSend = {
+                type: document.getElementById("type").value,
+                subject: document.getElementById("subject").value,
+                grade: Number(document.getElementById("grade").value),
+                trimester: Number(document.getElementById("trimester").value),
+                student: {
+                    name: window.location.href.substr(result[result.length - 1] + 1, window.location.href.length).replace(searchRegExp, replaceWith)
+                }                
+            }
+
+            xhr.send(JSON.stringify(dataToBeSend));
+            xhr.onload = function () {
+                let data = JSON.parse(this.response);
+
+                const container = document.getElementById("container")
+                while (container.firstChild) {
+                    container.removeChild(container.lastChild);
+                }
+
+                if (this.status !== 201) {
+                    const errorDiv = document.createElement("div")
+                    container.appendChild(errorDiv);
+                    errorDiv.setAttribute("class", "alert alert-danger")
+
+                    if (data.fields) {
+                        data.fields.forEach((field) => {
+                            errorDiv.innerHTML += `${field.name} ${field.message} <br>`
+                        })
+                    }
+
+                } else {
+                    const successDiv = document.createElement("div")
+                    container.appendChild(successDiv);
+                    successDiv.setAttribute("class", "alert alert-success")
+                    successDiv.innerHTML = `
+                    Evaluation Created
+                    `
+
+                    const newDiv = document.createElement("div")
+                    evaluationsContainer.append(newDiv)
+
+                    const subjectSpan = document.createElement("span")
+                    subjectSpan.innerHTML = `${data.subject}`
+
+                    const gradeSpan = document.createElement("span")
+                    gradeSpan.innerHTML = `${data.grade}`
+
+                    const TypeSpan = document.createElement("span")
+                    TypeSpan.innerHTML = `${data.type}`
+
+                    newDiv.append(TypeSpan)
+                    newDiv.innerHTML += "&nbsp"
+
+                    newDiv.append(subjectSpan)
+                    newDiv.innerHTML += "&nbsp"
+
+                    newDiv.append(gradeSpan)
+                    newDiv.innerHTML += "&nbsp"
+                }
+            }
+        })
+
+    </script>
+</body>
+
+</html>
